@@ -1,5 +1,6 @@
+import json
 from flask_restful import Resource, reqparse
-from models.game import GameModel
+from models.game import GameModel, GameNotFoundError, PlatformNotFoundError, InvalidRegionError, RegionNotFoundError, ReleaseDateNotFoundError
 
 
 class Game(Resource):
@@ -25,27 +26,42 @@ class Game(Resource):
     )
 
     def get(self, name):
+        # TODO get by id and/or by 3 params (name, platform region)
         return
 
     def post(self):
 
+        # TODO Get this data from a Twilio SMS message
         data = Game.parser.parse_args()
 
-        # deconstruct data into [price] and [store_id] arguements
-        game = GameModel(**data)
+        try:
+            game = GameModel(**data)
+        except GameNotFoundError as e:
+            return {'message': str(e)}, 400
+        except PlatformNotFoundError as e:
+            return {'message': str(e)}, 400
+        except ReleaseDateNotFoundError as e:
+            return {'message': str(e)}, 400
+        except InvalidRegionError as e:
+            return {'message': str(e)}, 400
+        except RegionNotFoundError as e:
+            return {'message': str(e)}, 400
 
         try:
             game.save_to_db()
         except:
             return {'message': f'A database error occurred inserting game {game.name}'}, 500
 
-        # 201 -> Created, 202 -> Accepted
+        # TODO after creation in db, create google calendar event with game info
         return game.json(), 201
 
     def delete(self, name):
+        # TODO delete by id, and/or by 3 params (name, platform region)
         return
 
     def put(self, name):
+        # TODO put by id, and/or by 3 params (name, platform region)
+        # Updates will be received by Twilio and update google calendar events
         return
 
 

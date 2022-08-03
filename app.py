@@ -17,8 +17,6 @@ api = Api(app)
 def create_tables():
     db.create_all()
 
-# TODO add logging
-
 
 @app.before_first_request
 def twitch_login():
